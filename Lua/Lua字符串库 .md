@@ -88,19 +88,25 @@ print(string.format(("%s%d"),"sdf",123))
 
     泛型for的语法如下
 
+    ```lua
     for <var-list> in <exp-list> do
-
-    ​	<body>
-
+    
+    	<body>
+    
     end
+    
+    ```
 
     具体的说，对于以下语句
 
+    ```lua
     for var_1,...,var_n in <explist> do
-
-    ​	<block>
-
+    
+    	<block>
+    
     end
+    
+    ```
 
     执行过程中相当于进行了以下操作
 
