@@ -1498,3 +1498,208 @@ I/O库为文件操作提供了两种不同的模型，简单模型和完整模�
 
 ##### 第二十四章 C API概述
 
+C和Lua之间交互的两种形式
+
+	第一种形式，C语言拥有控制权，Lua是一个库，这种形式中的C代码称为应用程序代码
+
+	第二种形式，Lua拥有控制权，C语言是一个库，因此C代码称为库代码
+
+应用程序代码和库代码都使用同样的API来与Lua通信，这些API称为C API
+
+Lua和C通信的主要方法是一个无所不在的虚拟栈，几乎所有的API调用都会操作这个栈上的值。
+
+C语言和Lua之间存在两大差异：
+
+	第一种差异是Lua使用垃圾收集，而C语言要求显示地释放内存
+
+	第二种是Lua使用动态类型，而C语言使用静态类型
+
+* **24.1第一个示例**
+
+  lua.h定义了Lua提供的基础函数 其中所有内容都有一个lua_前缀
+
+  luaxlib.h luaL_开头 基于lua.hAPI的更高层的抽象 辅助库
+
+  所有的状态都保存在动态结构lua_State中 所有的C API都要求传入一个指向该结构的指针
+
+  luaL_newstate用于创建一个新环境
+
+  luaL_loadbuffer编译用户输入的每行内容
+
+  lua_pcall在保护模式运行
+
+  lua_tostring获取消息
+
+  lua_pop 弹出栈
+
+  lua_close关闭Lua状态
+
+* **24.2栈**
+
+  栈由lua管理
+
+  按LIFO先出后进规范来操作这个栈
+
+  * 压入元素
+
+    对于每种可以呈现在lua中的C类型 api都有一个对应的压入函数
+
+    lua_pushnil lua_pushnumber lua_pushinteger 
+
+    lua_pushboolean lua_pushlstring lua_pushstring
+
+
+
+  	lua_checkstack用来检查栈中是否有足够的空间
+
+  * 查询元素
+
+    使用索引来引用栈中的元素 栈底为1 栈顶为-1
+
+    lua_is*用来检查一个元素是否为特定的类型(是否能转换为特定类型)
+
+    lua_type返回栈中元素的类型
+
+    lua_to*从栈中获取一个值
+
+    不要在C函数之外使用在C函数内获得的指向Lua字符串的指针
+
+    lua_tostring用NULL作第三个参数来调用lua_tolstring
+
+    lua_objlen返回一个对象的长度 对于字符串和table 是#的结果 还可以用于获取一个完全userdata的大小
+
+  * lua_gettop
+
+    lua_settop
+
+    	将栈顶设置为一个指定的位置 多余弹出 不足补nil
+
+    	#define lua_pop(L, n) lua_settop(L, -(n) - 1)
+
+    lua_pushvalue 
+
+    lua_remove
+
+    lua_insert
+
+    lua_replace
+
+* **24.3C API中的错误处理**
+
+  setjmp
+
+  几乎所有的API都会抛出错误 而不是返回错误
+
+  * 应用程序代码中的错误处理
+
+    lua_atpanic 设置紧急函数 函数返回后 lua会结束应用
+
+    * 设置紧急函数
+    * 让代码在保护模式下运行
+
+  * 库代码中的错误处理
+
+    调用lua_error
+
+    lua_error函数会清理Lua中所有需要清理的东西 然后跳转回发起执行的那个lua_pcall 并附上一条错误消息
+
+##### 第二十五章 扩展应用程序
+
+如何用Lua来配置一个程序
+
+* **25.1基础**
+
+  创建Lua状态
+
+  加载文件 编译
+
+  运行编译好的程序块
+
+  获得参数
+
+* **25.2table操作**
+
+  lua_gettable
+
+  	先压入key lua_pushstring(L, key)
+
+  	再获得对应的值 lua_gettable(L, -2)
+
+  5.1提供了lua_gettable(L, index, key)完成上述操作
+
+  lua_settable
+
+  	压入key lua_pushstring(L, index)
+
+  	压入value lua_pushnumber(L, value)
+
+  	设置 lua_settable(L, -3)
+
+  5.1提供特化版本lua_setfield
+
+  	压入value
+
+  	lua_setfield
+
+* **25.3调用Lua函数**
+
+  将待调用的函数压入栈
+
+  再压入函数的参数
+
+  使用pcall进行实际调用
+
+  将结果弹出
+
+  lua_pcall(L, 2, 1, 0) 调用参数数量 期望的结果数量 错误处理函数索引（0表示没有）
+
+  有多个结果时 第一个结果会优先压入
+
+* **25.4一个通用的调用函数**
+
+  调用lua函数的示例
+
+##### 第二十六章 从Lua调用C
+
+栈不是一个全局性的结构，每个函数都有自己的局部私有栈。
+
+* **26.1C函数**
+
+  所有注册到Lua中的函数都具有相同的原型 即定义在lua.h中的lua_CFunction
+
+  typedef int (*lua_CFunction)(lua_State *L)
+
+  lua使用函数之前 必须注册这个函数 使用lua_pushcfunction进行注册
+
+* **26.2C模块**
+
+  luaL_register
+
+##### 第二十七章 编写C函数的技术
+
+* 27.1数组操作
+* 27.2字符串操作
+* 27.3在C函数中保存状态
+
+##### 第二十八章 用户自定义类型
+
+* 28.1 userdata
+* 28.2 元表
+* 28.3 面向对象的访问
+* 28.4 数组访问
+* 28.5 轻量级userdata
+
+##### 第二十九章 管理资源
+
+* 29.1目录迭代器
+* 29.2XML分析器
+
+##### 第三十章 线程和状态
+
+* 30.1 多个线程
+* 30.2 Lua状态
+
+##### 第三十一章 内存管理
+
+* 31.1分配函数
+* 31.2垃圾收集器
