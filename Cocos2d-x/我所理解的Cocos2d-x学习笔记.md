@@ -133,3 +133,28 @@
 * 第四章
 
   自动批绘制
+
+* 第五章
+
+  纹理
+
+  UNPACK_ALIGNMENT对齐方式
+
+  BGR
+
+  多级纹理
+
+  纹理压缩
+
+* 第六章
+
+  * 颜色混合
+  * 颜色叠加
+  * animationCache
+  * textureAtlas
+
+* 第七章
+
+  GLSL
+
+  
