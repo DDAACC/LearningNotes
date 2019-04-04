@@ -14,6 +14,12 @@
 
     所有事件类的基类
 
+    _type
+
+    _isStopped
+
+    _currentTarget
+
     枚举类型
 
     ```C++
@@ -53,6 +59,12 @@
 
     控制监听器的注册和事件的派发
 
+    addEventListenerWithSceneGraphPriority(EventListener* listener, Node* node);
+
+    addEventListenerWithFixedPriority(EventListener* listener, int fixedPriority);
+
+    addCustomEventListener(const std::string &eventName, const std::function<void(EventCustom*)>& callback);
+
   * EventListener类
 
     The base class of event listener.
@@ -62,6 +74,24 @@
     For instance, you could refer to EventListenerAcceleration, EventListenerKeyboard, EventListenerTouchOneByOne, EventListenerCustom.
 
     事件监听器的基类
+
+    _onEvent
+
+    _type
+
+    _listenerID
+
+    _isRegistered
+
+    _fixedPriority
+
+    _node
+
+    _paused
+
+    _isEnabled
+
+    子类设置不同的type listenerId 回调
 
     枚举类型
 
@@ -80,7 +110,7 @@
         };
     ```
 
-
+  
 
     - 触摸事件     : EventListenerTouchOneByOne、EventListenerTouchAllAtOnce
     - 鼠标响应事件 : EventListenerMouse
@@ -303,7 +333,42 @@
 
   A lower priority will be called before the ones that have a higher value.
 
+  ```C++
+  /** Listeners map */
+  std::unordered_map<EventListener::ListenerID, EventListenerVector*> _listenerMap;
+  
+  /** The map of dirty flag */
+  std::unordered_map<EventListener::ListenerID, DirtyFlag> _priorityDirtyFlagMap;
+  
+  /** The map of node and event listeners */
+  std::unordered_map<Node*, std::vector<EventListener*>*> _nodeListenersMap;
+  
+  /** The map of node and its event priority */
+  std::unordered_map<Node*, int> _nodePriorityMap;
+  
+  /** key: Global Z Order, value: Sorted Nodes */
+  std::unordered_map<float, std::vector<Node*>> _globalZOrderNodeMap;
+  
+  /** The listeners to be added after dispatching event */
+  std::vector<EventListener*> _toAddedListeners;
+  
+  /** The listeners to be removed after dispatching event */
+  std::vector<EventListener*> _toRemovedListeners;
+  
+  /** The nodes were associated with scene graph based priority listeners */
+  std::set<Node*> _dirtyNodes;
+  
+  /** Whether the dispatcher is dispatching event */
+  int _inDispatch;
+  
+  /** Whether to enable dispatching event */
+  bool _isEnabled;
+  
+  int _nodePriorityIndex;
+  ```
 
+  * visitTarget 
+  * pauseEventListenersForTarget
 
 #### 3.使用
 
