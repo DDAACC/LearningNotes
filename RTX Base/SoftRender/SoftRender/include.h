@@ -1,0 +1,10 @@
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <assert.h>
+#include <windows.h>
+#include <tchar.h>
+#include "time.h"
+#include <iostream>
+#include "vec3.hpp"
